@@ -49,25 +49,32 @@ client = OpenAI(api_key=api_key)
 # --- CLASSE PARA GERAR PDF (NOVIDADE) ---
 class RelatorioPDF(FPDF):
     def header(self):
-        # Você pode colocar um logo.png na pasta e descomentar a linha abaixo
-        # self.image('logo.png', 10, 8, 33)
-        self.set_font('Arial', 'B', 15)
-        self.cell(0, 10, 'Relatório de Auditoria Técnica - AVCB/CLCB', 0, 1, 'C')
-        self.ln(5)
+        # Tenta colocar o logo se o arquivo existir
+        try:
+            # (nome_arquivo, x, y, largura)
+            self.image('logo.png', 10, 8, 25) 
+            self.set_font('Arial', 'B', 15)
+            # Move o título para a direita para não ficar em cima do logo
+            self.cell(30) 
+            self.cell(0, 10, 'Relatório de Auditoria Técnica - AVCB/CLCB', 0, 1, 'L')
+            self.ln(20) # Pula linha
+        except:
+            # Se não tiver logo, faz o padrão
+            self.set_font('Arial', 'B', 15)
+            self.cell(0, 10, 'Relatório de Auditoria Técnica - AVCB/CLCB', 0, 1, 'C')
+            self.ln(10)
 
     def footer(self):
         self.set_y(-15)
         self.set_font('Arial', 'I', 8)
-        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+        self.cell(0, 10, f'Página {self.page_no()} - Gerado por Auditor IA', 0, 0, 'C')
 
     def chapter_body(self, body):
         self.set_font('Arial', '', 11)
-        # O FPDF tem problemas com caracteres especiais (UTF-8), então precisamos tratar
-        # Uma forma simples é usar encode('latin-1', 'replace') para evitar erro
+        # Tratamento de caracteres especiais para PDF
         texto_tratado = body.encode('latin-1', 'replace').decode('latin-1')
         self.multi_cell(0, 10, texto_tratado)
         self.ln()
-
 
 # --- CLASSE DE MEMÓRIA (MANTIDA IGUAL) ---
 class BibliotecaNormas:
@@ -132,6 +139,7 @@ st.title("🏢 Master Auditor: AVCB & CLCB (Gerador de Laudo)")
 
 # --- SIDEBAR (UPLOAD NORMAS) ---
 with st.sidebar:
+    st.image("logo.png", width=150) # <--- ADICIONE ISSO
     st.header("📚 Biblioteca de ITs")
     st.info("Faça upload de TODAS as ITs (IT-17, IT-22, etc).")
     uploaded_its = st.file_uploader("Adicionar Normas", type="pdf", accept_multiple_files=True)
@@ -241,3 +249,4 @@ if st.button("🔍 Auditar e Gerar Laudo", type="primary"):
     else:
 
         st.warning("Envie os documentos necessários.")
+
