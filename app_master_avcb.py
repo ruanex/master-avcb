@@ -7,6 +7,32 @@ import datetime
 
 # --- CONFIGURAÇÕES ---
 st.set_page_config(page_title="Master Auditor AVCB/CLCB", page_icon="🏢", layout="wide")
+# --- SISTEMA DE LOGIN ---
+def check_password():
+    """Retorna True se a senha estiver correta."""
+    def password_entered():
+        if st.session_state["password"] == st.secrets["PASSWORD"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Não armazena a senha
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # Primeira vez: mostra o campo de senha
+        st.text_input("🔑 Digite a senha de acesso:", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        # Senha errada: pede de novo
+        st.text_input("🔑 Digite a senha de acesso:", type="password", on_change=password_entered, key="password")
+        st.error("😕 Senha incorreta")
+        return False
+    else:
+        # Senha correta
+        return True
+
+# Se a senha não estiver correta, para o app aqui.
+if not check_password():
+    st.stop()
 
 # --- CONFIGURAÇÃO API (MODO SEGURO) ---
 # A chave será pega dos "Segredos" da nuvem, não do código.
@@ -213,4 +239,5 @@ if st.button("🔍 Auditar e Gerar Laudo", type="primary"):
             )
 
     else:
+
         st.warning("Envie os documentos necessários.")
